@@ -11,7 +11,10 @@ import Jimp = require("jimp");
 export async function filterImageFromURL(inputURL: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log('inside the method filterImageFromURL funcation  ',inputURL );
+
       const photo = await Jimp.read(inputURL);
+      console.log('After the line Jimp read');
       const outpath =
         "/tmp/filtered." + Math.floor(Math.random() * 2000) + ".jpg";
       await photo
@@ -22,6 +25,8 @@ export async function filterImageFromURL(inputURL: string): Promise<string> {
           resolve(__dirname + outpath);
         });
     } catch (error) {
+      console.log('exception in filterImageFromURL',error );
+      
       reject(error);
     }
   });
@@ -35,5 +40,21 @@ export async function filterImageFromURL(inputURL: string): Promise<string> {
 export async function deleteLocalFiles(files: Array<string>) {
   for (let file of files) {
     fs.unlinkSync(file);
+  }
+
+  
+}
+
+export const isValidImage = (imageUrl: string) => {
+  return imageUrl.match(/\.(jpeg|jpg|gif|png)$/)
+}
+
+export const isValidUrl = (imageUrl: string) => {
+  try {
+    new URL(imageUrl)
+    return true
+  } catch (error) {
+    console.error(error)
+    return false
   }
 }
