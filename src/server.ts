@@ -16,38 +16,46 @@ import {filterImageFromURL, deleteLocalFiles, isValidImage, isValidUrl} from './
   
 
   // RESTFUL Endpoint for FilterObjects which takes image_url in queryParams
-  app.get('/filteredimage',async (req,res) => {
+  app.get('/filteredimage',async (req: express.Request, res: express.Response) => {
 
-    const {image_url} = req.query;
+    if (
+      req.query &&
+      req.query.image_url &&
+      typeof req.query.image_url === 'string'
+    ) 
+    {
+        const image_url: string = <string>req.query.image_url
+      
+        if(image_url === undefined || !image_url ){
+          res.status(404)
+              .send('URL for the image was not found !!!.');
+        }
     
-    if(image_url === undefined || !image_url ){
-      res.status(404)
-          .send('URL for the image was not found !!!.');
-    }
-
-    if (!isValidUrl(image_url)) {
-      return res.status(400).send({ error: 'image_url is invalid' })
-    }
-
-    if (!isValidImage(image_url)) {
-      return res
-        .status(422)
-        .send({ error: 'image_url is not a valid image' })
-    }
-
-    try{
-    const filterImageresult = await filterImageFromURL(image_url);
-    res.status(200)
-        .sendFile(filterImageresult,{},async function(err){
-          if(!err){
-            await deleteLocalFiles([filterImageresult]);
-          }
-    });
-    }catch (error) {
+        if (!isValidUrl(image_url)) {
+          return res.status(400).send({ error: 'image_url is invalid' })
+        }
+    
+        if (!isValidImage(image_url)) {
           return res
             .status(422)
-            .send({ error: 'error image could not be processed' })
+            .send({ error: 'image_url is not a valid image' })
+        }
+    
+        try{
+        const filterImageresult = await filterImageFromURL(image_url);
+        res.status(200)
+            .sendFile(filterImageresult,{},async function(err){
+              if(!err){
+                await deleteLocalFiles([filterImageresult]);
+              }
+        });
+        }catch (error) {
+              return res
+                .status(422)
+                .send({ error: 'error image could not be processed' })
+      }
     }
+    
     
    
   });
